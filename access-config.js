@@ -1,7 +1,6 @@
-// ACCESS configuration placeholder.
-// Do not put Paystack secret keys, passwords, OTPs, card details or other secrets here.
-// The public Supabase URL and anon/publishable key can be added here later after the project is created.
 window.ACCESS_CONFIG = {
-  SUPABASE_URL: "",
-  SUPABASE_ANON_KEY: ""
+  SUPABASE_URL: "https://awjimlkecsjidsrvquo.supabase.co",
+  SUPABASE_PUBLISHABLE_KEY: "PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE"
 };
+// Never put a Supabase secret/service_role key, database password,
+// Paystack secret key, OTP, card details, or passwords here.
