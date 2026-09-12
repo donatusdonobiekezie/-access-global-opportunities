@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ACCESS — Dashboard</title>
+<style>
+:root{color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:#090b0d;color:#f5f7f8;font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{padding:18px 20px;border-bottom:1px solid #293136;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#090b0d;z-index:5}
+.logo{font-size:20px;font-weight:800;letter-spacing:.02em}
+.out{background:#121619;color:#fff;border:1px solid #384147;border-radius:10px;padding:10px 14px;font-weight:650}
+main{max-width:1050px;margin:auto;padding:30px 20px 60px}
+.eyebrow{color:#aeb7bc;letter-spacing:.04em;font-size:14px}
+h1{font-size:clamp(34px,7vw,58px);line-height:1.02;margin:10px 0}
+h2{font-size:28px;margin:0 0 8px}
+.muted{color:#aeb7bc}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:24px 0}
+.card{background:#111619;border:1px solid #293136;border-radius:16px;padding:18px}
+.stat b{font-size:28px;display:block;margin-bottom:4px}
+.badge{color:#a5f1cf}
+.section{margin-top:28px}
+.feed-head{display:flex;justify-content:space-between;gap:12px;align-items:end;flex-wrap:wrap}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
+.filter{background:#121619;border:1px solid #384147;color:#dfe5e7;border-radius:999px;padding:8px 12px}
+.filter.active{border-color:#a5f1cf;color:#a5f1cf}
+.opps{display:grid;gap:14px}
+.opp{background:#111619;border:1px solid #293136;border-radius:18px;padding:20px}
+.opp-top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+.opp h3{font-size:22px;line-height:1.15;margin:0 0 6px}
+.meta{color:#aeb7bc;font-size:14px}
+.pills{display:flex;gap:7px;flex-wrap:wrap;margin:14px 0}
+.pill{border:1px solid #39434a;border-radius:999px;padding:5px 9px;font-size:12px;color:#d8e0e3}
+.pill.good{color:#a5f1cf;border-color:#5c8d7b}
+.opp-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+.label{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:#7f8a90}
+.value{margin-top:3px;color:#e6ecee}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.apply{display:inline-block;background:#e8fff7;color:#07100d;text-decoration:none;border-radius:10px;padding:11px 15px;font-weight:750}
+.source{display:inline-block;color:#c8d0d3;text-decoration:none;border:1px solid #384147;border-radius:10px;padding:10px 14px}
+.empty{padding:28px;text-align:center;color:#aeb7bc;border:1px dashed #39434a;border-radius:16px}
+.notice{font-size:13px;color:#9fa9ae;margin-top:16px}
+@media(max-width:800px){.grid{grid-template-columns:1fr 1fr}.opp-grid{grid-template-columns:1fr}}
+@media(max-width:520px){.grid{grid-template-columns:1fr 1fr}.opp-top{display:block}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">ACCESS</div>
+  <button class="out" id="out">Sign out</button>
+</header>
+
+<main>
+  <p class="eyebrow">YOUR PERSONAL OPPORTUNITY RADAR</p>
+  <h1 id="welcome">Your dashboard</h1>
+  <p class="muted" id="email"></p>
+
+  <div class="grid">
+    <div class="card stat"><b id="matches">0</b><span class="muted">Verified opportunities</span></div>
+    <div class="card stat"><b id="saved">0</b><span class="muted">Saved</span></div>
+    <div class="card stat"><b id="apps">0</b><span class="muted">Applications</span></div>
+    <div class="card stat"><b class="badge" id="plan">FREE</b><span class="muted">Current plan</span></div>
+  </div>
+
+  <section class="section">
+    <div class="feed-head">
+      <div>
+        <h2>Opportunity feed</h2>
+        <p class="muted">Verified opportunities currently available in the ACCESS database.</p>
+      </div>
+    </div>
+
+    <div class="filters" id="filters"></div>
+    <div class="opps" id="opps"><div class="empty">Loading verified opportunities…</div></div>
+    <p class="notice">ACCESS shows verification and risk signals to help users evaluate opportunities. Eligibility and availability can change by location, qualification and provider requirements.</p>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="access-config.js"></script>
+<script>
+(async()=>{
+  const c=window.ACCESS_CONFIG;
+  const $=id=>document.getElementById(id);
+
+  if(!c?.SUPABASE_URL || !c?.SUPABASE_PUBLISHABLE_KEY){
+    $("opps").innerHTML='<div class="empty">ACCESS is not connected to Supabase yet.</div>';
+    return;
+  }
+
+  const client=supabase.createClient(c.SUPABASE_URL,c.SUPABASE_PUBLISHABLE_KEY);
+  const sessionResult=await client.auth.getSession();
+  const session=sessionResult.data.session;
+  if(!session){ location.href="auth.html"; return; }
+
+  $("email").textContent=session.user.email||"";
+  const name=session.user.user_metadata?.full_name;
+  if(name) $("welcome").textContent="Welcome, "+name;
+
+  const sub=await client.from("subscriptions").select("plan,status").eq("user_id",session.user.id).maybeSingle();
+  if(sub.data) $("plan").textContent=(sub.data.plan+" "+sub.data.status).toUpperCase();
+
+  const saved=await client.from("saved_opportunities").select("*",{count:"exact",head:true}).eq("user_id",session.user.id);
+  const apps=await client.from("applications").select("*",{count:"exact",head:true}).eq("user_id",session.user.id);
+  $("saved").textContent=saved.count||0;
+  $("apps").textContent=apps.count||0;
+
+  const result=await client.from("opportunities")
+    .select("id,title,company,description,category,opportunity_type,country,countries,currency,compensation_text,application_url,source_url,eligibility_text,verification_status,risk_level,deadline,published_at,created_at")
+    .eq("verification_status","verified")
+    .order("created_at",{ascending:false});
+
+  if(result.error){
+    $("opps").innerHTML='<div class="empty">We could not load the opportunity feed. Please refresh and try again.</div>';
+    return;
+  }
+
+  const opportunities=result.data||[];
+  $("matches").textContent=opportunities.length;
+
+  const categories=[...new Set(opportunities.map(o=>o.category).filter(Boolean))];
+  let active="ALL";
+
+  function renderFilters(){
+    $("filters").innerHTML="";
+    ["ALL",...categories].forEach(cat=>{
+      const b=document.createElement("button");
+      b.className="filter"+(active===cat?" active":"");
+      b.textContent=cat==="ALL"?"All":cat;
+      b.onclick=()=>{active=cat;renderFilters();renderOpps()};
+      $("filters").appendChild(b);
+    });
+  }
+
+  function esc(v){
+    return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+  }
+
+  function renderOpps(){
+    const list=active==="ALL"?opportunities:opportunities.filter(o=>o.category===active);
+    if(!list.length){
+      $("opps").innerHTML='<div class="empty">No opportunities in this category yet.</div>';
+      return;
+    }
+    $("opps").innerHTML=list.map(o=>{
+      const countries=Array.isArray(o.countries)&&o.countries.length?o.countries.join(", "):(o.country||"Multiple locations");
+      const verify=(o.verification_status||"").toUpperCase();
+      const risk=(o.risk_level||"").toUpperCase();
+      return `<article class="opp">
+        <div class="opp-top">
+          <div>
+            <h3>${esc(o.title)}</h3>
+            <div class="meta">${esc(o.company)} · ${esc(o.opportunity_type||o.category||"Opportunity")}</div>
+          </div>
+        </div>
+        <div class="pills">
+          ${o.category?`<span class="pill">${esc(o.category)}</span>`:""}
+          ${verify?`<span class="pill good">✓ ${esc(verify)}</span>`:""}
+          ${risk?`<span class="pill">Risk: ${esc(risk)}</span>`:""}
+        </div>
+        <p>${esc(o.description||"")}</p>
+        <div class="opp-grid">
+          <div><div class="label">Compensation</div><div class="value">${esc([o.currency,o.compensation_text].filter(Boolean).join(" · ")||"Varies by opportunity")}</div></div>
+          <div><div class="label">Location</div><div class="value">${esc(countries)}</div></div>
+          <div><div class="label">Eligibility</div><div class="value">${esc(o.eligibility_text||"See official listing")}</div></div>
+          <div><div class="label">Deadline</div><div class="value">${o.deadline?esc(new Date(o.deadline).toLocaleString()):"No deadline listed"}</div></div>
+        </div>
+        <div class="actions">
+          ${o.application_url?`<a class="apply" href="${esc(o.application_url)}" target="_blank" rel="noopener">Apply / View opportunity</a>`:""}
+          ${o.source_url?`<a class="source" href="${esc(o.source_url)}" target="_blank" rel="noopener">Official source</a>`:""}
+        </div>
+      </article>`;
+    }).join("");
+  }
+
+  renderFilters();
+  renderOpps();
+
+  $("out").onclick=async()=>{
+    await client.auth.signOut();
+    location.href="auth.html";
+  };
+})();
+</script>
+</body>
+</html>
