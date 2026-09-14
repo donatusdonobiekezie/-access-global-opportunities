@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ACCESS — Dashboard</title>
+<style>
+:root{color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:#080b0d;color:#f5f7f8;font:15px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input{font:inherit}
+header{padding:16px clamp(16px,4vw,34px);border-bottom:1px solid #293136;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:rgba(8,11,13,.94);backdrop-filter:blur(14px);z-index:5}
+.logo{font-size:21px;font-weight:850;letter-spacing:.03em}
+.out{background:#121619;color:#fff;border:1px solid #384147;border-radius:10px;padding:10px 14px;font-weight:700}
+main{width:min(1180px,100%);margin:auto;padding:34px clamp(16px,4vw,34px) 64px}
+.eyebrow{color:#9eaaaF;letter-spacing:.08em;font-size:12px;font-weight:750;margin:0}
+h1{font-size:clamp(34px,5vw,56px);line-height:1.02;margin:10px 0 8px;max-width:850px}
+h2{font-size:28px;margin:0 0 8px}
+.muted{color:#aeb7bc}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:24px 0}
+.card{background:#111619;border:1px solid #293136;border-radius:16px;padding:18px}
+.stat b{font-size:28px;display:block;margin-bottom:3px}
+.badge{color:#a5f1cf}
+.section{margin-top:30px}
+.feed-head{display:flex;justify-content:space-between;gap:16px;align-items:end;flex-wrap:wrap}
+.searchbar{display:flex;gap:10px;margin:18px 0 10px}
+.searchbar input{flex:1;min-width:0;background:#121619;color:#fff;border:1px solid #384147;border-radius:12px;padding:13px 14px;font-size:15px}
+.searchbar button,.region button{background:#121619;color:#e8fff7;border:1px solid #5c8d7b;border-radius:10px;padding:11px 14px;font-weight:750}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 18px}
+.filter{background:#121619;border:1px solid #384147;color:#dfe5e7;border-radius:999px;padding:8px 12px;cursor:pointer}
+.filter.active{border-color:#a5f1cf;color:#a5f1cf}
+.opps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.opp{background:#111619;border:1px solid #293136;border-radius:18px;padding:20px;min-width:0;display:flex;flex-direction:column}
+.opp-top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+.opp h3{font-size:20px;line-height:1.2;margin:0 0 6px}
+.meta{color:#aeb7bc;font-size:13px}
+.pills{display:flex;gap:7px;flex-wrap:wrap;margin:14px 0 12px}
+.pill{border:1px solid #39434a;border-radius:999px;padding:5px 9px;font-size:11px;color:#d8e0e3;white-space:nowrap}
+.pill.good{color:#a5f1cf;border-color:#5c8d7b}
+.opp>p{color:#cbd3d6;margin:2px 0 14px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;min-height:4.45em}
+.opp-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:2px 0 0}
+.label{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:#7f8a90}
+.value{margin-top:3px;color:#e6ecee;font-size:13px;overflow-wrap:anywhere}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:auto;padding-top:16px}
+.apply,.source{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;border-radius:10px;padding:10px 13px;font-weight:750;font-size:13px}
+.apply{background:#e8fff7;color:#07100d}
+.source{color:#c8d0d3;border:1px solid #384147}
+.empty{padding:28px;text-align:center;color:#aeb7bc;border:1px dashed #39434a;border-radius:16px;grid-column:1/-1}
+.notice{font-size:13px;color:#9fa9ae;margin-top:16px}
+.premium{background:linear-gradient(135deg,#111c19,#111619);border:1px solid #5c8d7b;border-radius:18px;padding:22px;margin:24px 0;display:flex;justify-content:space-between;gap:18px;align-items:center;flex-wrap:wrap}
+.premium h2{margin:0 0 6px;font-size:23px}.premium p{margin:0;color:#b8c3c0;max-width:720px}.premium-cta{display:inline-flex;align-items:center;justify-content:center;background:#e8fff7;color:#07100d;text-decoration:none;border-radius:10px;padding:12px 17px;font-weight:800;white-space:nowrap}
+.region{margin:18px 0;padding:16px;border:1px solid #293136;border-radius:14px;background:#0d1113}.region-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.region input{background:#121619;color:#fff;border:1px solid #384147;border-radius:10px;padding:10px 12px;min-width:220px;flex:1}.region-status{font-size:13px;margin-top:8px;color:#aeb7bc}
+.match{font-weight:750}.match.good{color:#a5f1cf}.match.warn{color:#ffd38a}.match.no{color:#ffaaa8}
+.guide{margin-top:16px;border-top:1px solid #293136;padding-top:16px}.guide h4{margin:0 0 10px;font-size:16px}.guide ul{margin:8px 0 0;padding-left:20px;color:#d9e1e3;font-size:13px}.locked{background:#0d1113;border:1px dashed #5c8d7b;border-radius:14px;padding:16px;margin-top:16px}.locked b{display:block;margin-bottom:5px}.locked a{color:#a5f1cf}.small{font-size:11px;color:#8f9a9f}.tier{font-weight:800}.tier.free{color:#d8e0e3}.tier.premium{color:#a5f1cf}.featured{border-color:#5c8d7b}
+@media(max-width:900px){
+  main{padding-top:28px}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .opps{grid-template-columns:1fr}
+}
+@media(max-width:560px){
+  body{font-size:14px}
+  header{padding:13px 14px}
+  .logo{font-size:19px}
+  .out{padding:8px 11px;font-size:13px}
+  main{padding:24px 12px 48px}
+  h1{font-size:34px}
+  h2{font-size:24px}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:18px 0}
+  .card{padding:13px;border-radius:13px}
+  .stat b{font-size:23px}
+  .premium{padding:17px;border-radius:15px}
+  .premium-cta{width:100%;padding:11px 13px}
+  .searchbar{gap:7px}
+  .searchbar input{width:100%;flex-basis:100%}
+  .searchbar button{padding:10px 12px}
+  .opp{padding:16px;border-radius:15px}
+  .opp h3{font-size:18px}
+  .opp-grid{grid-template-columns:1fr 1fr;gap:10px}
+  .actions>*{flex:1 1 100%}
+  .apply,.source{width:100%}
+  .region input{min-width:100%}
+}
+.source,.official-source,.source-btn{display:none!important}\n
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.72);display:grid;place-items:center;padding:18px;z-index:20}
+.modal-backdrop[hidden]{display:none}
+.apply-modal{width:min(560px,100%);background:#111619;border:1px solid #39434a;border-radius:18px;padding:24px;position:relative;box-shadow:0 24px 80px rgba(0,0,0,.45)}
+.modal-close{position:absolute;right:12px;top:8px;border:0;background:transparent;color:#aeb7bc;font-size:28px;cursor:pointer}
+.modal-details{margin:16px 0;padding:14px;border:1px solid #293136;border-radius:12px;background:#0d1113;color:#dfe5e7}
+.modal-details div{margin:7px 0}.modal-details b{color:#fff}
+.modal-actions{display:flex;gap:9px;justify-content:flex-end;flex-wrap:wrap}
+.modal-actions button{cursor:pointer}
+
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">ACCESS</div>
+  <button class="out" id="out">Sign out</button>
+</header>
+
+<main>
+  <p class="eyebrow">YOUR PERSONAL OPPORTUNITY RADAR</p>
+  <h1 id="welcome">Your dashboard</h1>
+  <p class="muted" id="email"></p>
+
+  <div class="premium">
+    <div><h2>ACCESS Premium</h2><p>Unlock guided registration, eligibility checks, task-readiness tips and a clearer path to each opportunity.</p></div>
+    <a class="premium-cta" href="https://paystack.shop/pay/6aoymx1uhs" target="_blank" rel="noopener">Get Premium — ₦4,999/month</a>
+  </div>
+
+  <div class="region">
+    <div class="label">Your current country of residence</div>
+    <div class="region-row">
+      <input id="countryInput" placeholder="e.g. Nigeria, Canada, United Kingdom" autocomplete="country-name">
+      <button id="saveCountry">Check my region</button>
+    </div>
+    <div class="region-status" id="regionStatus">Choose your current country of residence to see region matching where ACCESS has country data.</div>
+  </div>
+
+  <div class="grid">
+    <div class="card stat"><b id="matches">0</b><span class="muted">Verified opportunities</span></div>
+    <div class="card stat"><b id="saved">0</b><span class="muted">Saved</span></div>
+    <div class="card stat"><b id="apps">0</b><span class="muted">Applications</span></div>
+    <div class="card stat"><b class="badge" id="plan">FREE</b><span class="muted">Current plan</span></div>
+  </div>
+
+  <section class="section">
+    <div class="feed-head">
+      <div>
+        <h2>Opportunity feed</h2>
+        <p class="muted">Verified opportunities currently available in the ACCESS database.</p>
+      </div>
+    </div>
+
+    <div class="searchbar">
+      <input id="searchInput" placeholder="Search AI, research, remote work, writing, design, data..." autocomplete="off">
+      <button id="clearSearch" type="button">Clear</button>
+    </div>
+    <p class="small" id="libraryStatus">Search across the verified ACCESS library. Premium unlocks the full library and guided opportunity paths.</p>
+    <div class="filters" id="filters"></div>
+    <div class="opps" id="opps"><div class="empty">Loading verified opportunities…</div></div>
+    <p class="notice">ACCESS shows verification and risk signals to help users evaluate opportunities. Eligibility and availability can change by location, qualification and provider requirements.</p>
+  </section>
+</main>
+
+
+<div id="accessApplyModal" class="modal-backdrop" hidden>
+  <div class="apply-modal" role="dialog" aria-modal="true" aria-labelledby="applyModalTitle">
+    <button id="closeApplyModal" class="modal-close" type="button" aria-label="Close">×</button>
+    <p class="eyebrow">ACCESS APPLICATION PATH</p>
+    <h2 id="applyModalTitle">Ready to apply?</h2>
+    <p id="applyModalText" class="muted">ACCESS will first show you the key steps. Your application is completed with the opportunity provider after you choose to continue.</p>
+    <div id="applyModalDetails" class="modal-details"></div>
+    <div class="modal-actions">
+      <button id="cancelApply" class="source" type="button">Back</button>
+      <button id="continueApply" class="apply" type="button">Continue to official application</button>
+    </div>
+    <p class="small">ACCESS does not submit applications or guarantee acceptance, task volume, or payment.</p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="access-config.js"></script>
+<script>
+(async()=>{
+  const c=window.ACCESS_CONFIG;
+  const $=id=>document.getElementById(id);
+
+  if(!c?.SUPABASE_URL || !c?.SUPABASE_PUBLISHABLE_KEY){
+    $("opps").innerHTML='<div class="empty">ACCESS is not connected to Supabase yet.</div>';
+    return;
+  }
+
+  const client=supabase.createClient(c.SUPABASE_URL,c.SUPABASE_PUBLISHABLE_KEY);
+  const sessionResult=await client.auth.getSession();
+  const session=sessionResult.data.session;
+  if(!session){ location.href="auth.html"; return; }
+
+  $("email").textContent=session.user.email||"";
+  const name=session.user.user_metadata?.full_name;
+  if(name) $("welcome").textContent="Welcome, "+name;
+
+  const sub=await client.from("subscriptions").select("plan,status,current_period_end").eq("user_id",session.user.id).maybeSingle();
+  const isPremium=!!sub.data && sub.data.plan === "premium" && sub.data.status === "active";
+  if(sub.data) $("plan").textContent=(sub.data.plan+" "+sub.data.status).toUpperCase();
+
+  const saved=await client.from("saved_opportunities").select("*",{count:"exact",head:true}).eq("user_id",session.user.id);
+  const apps=await client.from("applications").select("*",{count:"exact",head:true}).eq("user_id",session.user.id);
+  $("saved").textContent=saved.count||0;
+  $("apps").textContent=apps.count||0;
+
+  let result=await client.from("opportunities")
+    .select("id,title,company,description,category,opportunity_type,country,countries,currency,compensation_text,application_url,source_url,eligibility_text,verification_status,risk_level,deadline,published_at,created_at,access_tier,featured")
+    .eq("verification_status","verified")
+    .order("created_at",{ascending:false});
+
+  if(result.error){
+    result=await client.from("opportunities")
+      .select("id,title,company,description,category,opportunity_type,country,countries,currency,compensation_text,application_url,source_url,eligibility_text,verification_status,risk_level,deadline,published_at,created_at")
+      .eq("verification_status","verified")
+      .order("created_at",{ascending:false});
+  }
+
+  if(result.error){
+    $("opps").innerHTML='<div class="empty">We could not load the opportunity feed. Please refresh and try again.</div>';
+    return;
+  }
+
+  const opportunities=(result.data||[]).map((o,i)=>({
+    ...o,
+    access_tier:o.access_tier||((i===0)?"free":"premium"),
+    featured:!!o.featured
+  }));
+  $("matches").textContent=opportunities.length;
+
+  const categories=[...new Set(opportunities.map(o=>o.category).filter(Boolean))];
+  let active="ALL";
+  let searchTerm="";
+
+  function renderFilters(){
+    $("filters").innerHTML="";
+    ["ALL",...categories].forEach(cat=>{
+      const b=document.createElement("button");
+      b.className="filter"+(active===cat?" active":"");
+      b.textContent=cat==="ALL"?"All":cat;
+      b.onclick=()=>{active=cat;renderFilters();renderOpps()};
+      $("filters").appendChild(b);
+    });
+  }
+
+  function decodeEntities(v){
+    const t=document.createElement("textarea");
+    t.innerHTML=String(v??"");
+    return t.value;
+  }
+
+  function cleanText(v){
+    return decodeEntities(v)
+      .replace(/<[^>]*>/g," ")
+      .replace(/\s+/g," ")
+      .trim();
+  }
+
+  function shortDescription(v){
+    const text=cleanText(v);
+    if(text.length<=220) return text;
+    const cut=text.slice(0,220);
+    const sentence=cut.lastIndexOf(". ");
+    return (sentence>110 ? cut.slice(0,sentence+1) : cut.replace(/\s+\S*$/,"")) + "…";
+  }
+
+  function esc(v){
+    return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+  }
+
+  const countryInput=$("countryInput");
+  const regionStatus=$("regionStatus");
+  const savedCountry=(localStorage.getItem("access_country")||"").trim();
+  if(savedCountry) countryInput.value=savedCountry;
+
+  function normalizeCountry(v){return String(v||"").trim().toLowerCase().replace(/\s+/g," ");}
+  function countryMatch(o,country){
+    if(!country) return "unknown";
+    const wanted=normalizeCountry(country);
+    const list=Array.isArray(o.countries)?o.countries:[];
+    const values=list.length?list:(o.country?[o.country]:[]);
+    return values.some(x=>normalizeCountry(x)===wanted)?"yes":"no";
+  }
+  function regionSummary(){
+    const country=countryInput.value.trim();
+    if(!country){regionStatus.textContent="Choose your current country of residence to see region matching where ACCESS has country data.";return;}
+    localStorage.setItem("access_country",country);
+    const yes=opportunities.filter(o=>countryMatch(o,country)==="yes").length;
+    regionStatus.innerHTML=`<span class="match ${yes?"good":"warn"}">${yes} verified opportun${yes===1?"y":"ies"} currently list ${esc(country)} as an eligible location.</span> Eligibility is still subject to the provider's own requirements.`;
+    renderOpps();
+  }
+  $("saveCountry").onclick=regionSummary;
+  $("searchInput").addEventListener("input",e=>{searchTerm=e.target.value.trim();renderOpps()});
+  $("clearSearch").onclick=()=>{$("searchInput").value="";searchTerm="";renderOpps()};
+
+  function renderOpps(){
+    const term=searchTerm.toLowerCase();
+    const categoryList=active==="ALL"?opportunities:opportunities.filter(o=>o.category===active);
+    const searched=term?categoryList.filter(o=>[
+      o.title,o.company,o.description,o.category,o.opportunity_type,o.country,
+      ...(Array.isArray(o.countries)?o.countries:[]),o.compensation_text
+    ].filter(Boolean).join(" ").toLowerCase().includes(term)):categoryList;
+    const list=isPremium?searched:searched.filter((o,i)=>o.access_tier==="free" && i===0);
+    const hiddenPremium=Math.max(0,searched.filter(o=>o.access_tier==="premium").length);
+    if(!list.length){
+      $("opps").innerHTML=`<div class="empty">${isPremium?"No matching verified opportunities yet.":"No free-preview matches. "+(hiddenPremium?hiddenPremium+" verified opportunities are available to Premium members.":"Try another search.")}</div>`;
+      return;
+    }
+    $("opps").innerHTML=list.map(o=>{
+      const countries=Array.isArray(o.countries)&&o.countries.length?o.countries.join(", "):(o.country||"Multiple locations");
+      const verify=(o.verification_status||"").toUpperCase();
+      const risk=(o.risk_level||"").toUpperCase();
+      const match=countryMatch(o,countryInput.value);
+      const matchHtml=match==="yes"?'<span class="match good">✓ Available in your selected region</span>':match==="no"?'<span class="match no">Not currently listed for your selected region</span>':'<span class="match warn">Region eligibility needs checking</span>';
+      const isFreeOpportunity=o.access_tier==="free";
+      const guideHtml=isPremium ? `<div class="guide">
+          <h4>ACCESS Guide</h4>
+          <ul>
+            <li><b>Eligibility:</b> ${esc(o.eligibility_text||"Review the opportunity requirements before applying.")}</li>
+            <li><b>What to prepare:</b> Relevant skills/experience and any qualification or identity checks requested by the provider.</li>
+            <li><b>Application path:</b> ACCESS will show the key steps before you continue to the provider.</li>
+            <li><b>Safety:</b> ACCESS verification is a signal, not a guarantee. Never pay an unknown person to secure work or share passwords, OTPs or sensitive financial credentials.</li>
+          </ul>
+        </div>` : `<div class="locked"><b>🔒 Premium required</b><div class="muted">This opportunity is reserved for ACCESS Premium members. Unlock the full library, detailed guidance and Premium alerts.</div><p><a href="https://paystack.shop/pay/6aoymx1uhs" target="_blank" rel="noopener">Get Premium — ₦4,999/month</a></p></div>`;
+      const tierHtml=o.access_tier==="premium"      const tierHtml=o.access_tier==="premium"
+        ? `<span class="pill tier premium">🔒 PREMIUM</span>`
+        : `<span class="pill tier free">FREE PREVIEW</span>`;
+      const featuredHtml=o.featured?`<span class="pill good">★ FEATURED</span>`:"";
+      return `<article class="opp ${o.featured?"featured":""}">
+        <div class="opp-top">
+          <div>
+            <h3>${esc(o.title)}</h3>
+            <div class="meta">${esc(o.company)} · ${esc(o.opportunity_type||o.category||"Opportunity")}</div>
+          </div>
+        </div>
+        <div class="pills">
+          ${o.category?`<span class="pill">${esc(o.category)}</span>`:""}
+          ${verify?`<span class="pill good">✓ ${esc(verify)}</span>`:""}
+          ${risk?`<span class="pill">Risk: ${esc(risk)}</span>`:""}
+          ${tierHtml}
+          ${featuredHtml}
+        </div>
+        <p>${esc(shortDescription(o.description||""))}</p>
+        <div class="opp-grid">
+          <div><div class="label">Compensation</div><div class="value">${esc([o.currency,o.compensation_text].filter(Boolean).join(" · ")||"Varies by opportunity")}</div></div>
+          <div><div class="label">Location</div><div class="value">${esc(countries)}</div></div>
+          <div><div class="label">Region check</div><div class="value">${matchHtml}</div></div>
+          <div><div class="label">Deadline</div><div class="value">${o.deadline?esc(new Date(o.deadline).toLocaleString()):"No deadline listed"}</div></div>
+        </div>
+        ${guideHtml}
+        <div class="actions">
+          ${isFreeOpportunity
+            ? `<button class="apply apply-gated" type="button"
+                data-id="${esc(o.id)}"
+                data-title="${esc(o.title)}"
+                data-company="${esc(o.company)}"
+                data-eligibility="${esc(o.eligibility_text||"Review the opportunity requirements before applying.")}"
+                data-application="${esc(o.application_url||"")}">Apply &amp; Register</button>`
+            : `<a class="premium-cta" href="https://paystack.shop/pay/6aoymx1uhs" target="_blank" rel="noopener">🔒 Unlock with Premium</a>`}
+        </div>
+      </article>`;
+    }).join("");
+  }
+
+  $("libraryStatus").textContent=isPremium
+    ? `Premium library: ${opportunities.length.toLocaleString()} verified opportunities currently loaded. Search across the full ACCESS library.`
+    : `Free access: 1 verified opportunity. The rest of the ACCESS library is reserved for Premium members.`;
+  renderFilters();
+  renderOpps();
+  if(savedCountry) regionSummary();
+
+
+  let pendingApplicationUrl="";
+  function openApplyModal(btn){
+    pendingApplicationUrl=btn.dataset.application||"";
+    $("applyModalTitle").textContent="Ready to apply?";
+    $("applyModalDetails").innerHTML=`
+      <div><b>Opportunity:</b> ${esc(btn.dataset.title||"")}</div>
+      <div><b>Company:</b> ${esc(btn.dataset.company||"")}</div>
+      <div><b>Eligibility:</b> ${esc(btn.dataset.eligibility||"")}</div>
+      <div><b>Next:</b> Review the ACCESS guidance, then continue to the provider's official application when you're ready.</div>`;
+    $("accessApplyModal").hidden=false;
+    document.body.style.overflow="hidden";
+  }
+  function closeApplyModal(){
+    $("accessApplyModal").hidden=true;
+    document.body.style.overflow="";
+    pendingApplicationUrl="";
+  }
+  $("opps").addEventListener("click",e=>{
+    const btn=e.target.closest(".apply-gated");
+    if(btn) openApplyModal(btn);
+  });
+  $("closeApplyModal").onclick=closeApplyModal;
+  $("cancelApply").onclick=closeApplyModal;
+  $("continueApply").onclick=()=>{
+    if(!pendingApplicationUrl){ closeApplyModal(); return; }
+    window.open(pendingApplicationUrl,"_blank","noopener,noreferrer");
+    closeApplyModal();
+  };
+  $("accessApplyModal").addEventListener("click",e=>{if(e.target.id==="accessApplyModal") closeApplyModal();});
+
+  $("out").onclick=async()=>{
+    await client.auth.signOut();
+    location.href="auth.html";
+  };
+})();
+</script>
+</body>
+</html>
