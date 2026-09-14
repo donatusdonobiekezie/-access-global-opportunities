@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ACCESS — Account</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#090b0d;color:#f5f7f8;font:16px system-ui;padding:24px}
+main{max-width:460px;margin:7vh auto;background:#121619;border:1px solid #293136;border-radius:22px;padding:28px}
+h1{font-size:30px;margin-bottom:8px}p{color:#aeb7bc;line-height:1.5}
+input,button{width:100%;box-sizing:border-box;padding:14px;margin:8px 0;border-radius:11px;font-size:16px}
+input{background:#0d1113;color:white;border:1px solid #384147}
+button{background:#e9fff6;color:#07120e;border:0;font-weight:800;cursor:pointer}
+.tabs{display:flex;gap:8px}.tabs button{background:#171c20;color:white;border:1px solid #384147}.tabs .active{background:#e9fff6;color:#07120e}
+#status{min-height:24px;color:#aeb7bc}.back{display:inline-block;margin-top:14px;color:#a5f1cf;text-decoration:none;font-size:14px}
+</style>
+</head>
+<body>
+<main>
+<strong>ACCESS</strong>
+<p>Your Personal Opportunity Radar</p>
+<div class="tabs">
+<button id="s" class="active" type="button">Create account</button>
+<button id="l" type="button">Sign in</button>
+</div>
+<h1 id="title">Create your account</h1>
+<p id="intro">Create your free ACCESS account to enter the opportunity dashboard.</p>
+<form id="f">
+<div id="nw"><input id="name" placeholder="Full name" autocomplete="name"></div>
+<input id="email" type="email" placeholder="Email" required autocomplete="email">
+<input id="pw" type="password" placeholder="Password (8+ characters)" minlength="8" required autocomplete="new-password">
+<button id="go" type="submit">Create account</button>
+</form>
+<div id="status"></div>
+<a class="back" href="index.html">← Back to ACCESS</a>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="access-config.js"></script>
+<script>
+const c=window.ACCESS_CONFIG;
+const client=(c?.SUPABASE_URL&&c?.SUPABASE_PUBLISHABLE_KEY&&!String(c.SUPABASE_PUBLISHABLE_KEY).includes("PASTE_"))
+  ?supabase.createClient(c.SUPABASE_URL,c.SUPABASE_PUBLISHABLE_KEY):null;
+let mode=new URLSearchParams(location.search).get("mode")==="login"?"login":"signup";
+const $=id=>document.getElementById(id);
+
+function setMode(m){
+  mode=m;
+  $("s").classList.toggle("active",m==="signup");
+  $("l").classList.toggle("active",m==="login");
+  $("nw").style.display=m==="signup"?"block":"none";
+  $("title").textContent=m==="signup"?"Create your account":"Welcome back";
+  $("intro").textContent=m==="signup"?"Create your free ACCESS account to enter the opportunity dashboard.":"Sign in to continue to your ACCESS opportunity dashboard.";
+  $("go").textContent=m==="signup"?"Create account":"Sign in";
+  $("status").textContent="";
+  $("pw").autocomplete=m==="signup"?"new-password":"current-password";
+}
+$("s").onclick=()=>setMode("signup");
+$("l").onclick=()=>setMode("login");
+
+(async()=>{
+  if(!client){setMode(mode);return;}
+  const {data}=await client.auth.getSession();
+  if(data?.session){location.href="dashboard.html";return;}
+  setMode(mode);
+})();
+
+$("f").onsubmit=async e=>{
+  e.preventDefault();
+  if(!client){$("status").textContent="ACCESS account services are not configured yet.";return;}
+  $("status").textContent="Working...";
+  try{
+    const email=$("email").value.trim();
+    const pw=$("pw").value;
+    if(mode==="signup"){
+      const r=await client.auth.signUp({email,password:pw,options:{data:{full_name:$("name").value.trim()}}});
+      if(r.error)throw r.error;
+      if(r.data.session)location.href="dashboard.html";
+      else{
+        setMode("login");
+        $("status").textContent="Account created. Check your email if confirmation is required, then sign in.";
+      }
+    }else{
+      const r=await client.auth.signInWithPassword({email,password:pw});
+      if(r.error)throw r.error;
+      location.href="dashboard.html";
+    }
+  }catch(x){$("status").textContent=x.message||"Something went wrong."}
+};
+</script>
+</body>
+</html>
